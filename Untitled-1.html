@@ -170,6 +170,12 @@
         gameFrame.src = selectedGame;
         gameFrameContainer.style.display = "block";
         fullscreenButton.style.display = "block";
+
+        if (selectedGame.includes("idle-breakout")) {
+            activateAutoClicker();
+        } else {
+            deactivateAutoClicker();
+        }
     }
 
     function toggleFullscreen() {
@@ -198,4 +204,32 @@
             panic();
         }
     });
+
+    var autoClickerInterval;
+
+    function activateAutoClicker() {
+        document.addEventListener("keydown", toggleAutoClicker);
+    }
+
+    function deactivateAutoClicker() {
+        document.removeEventListener("keydown", toggleAutoClicker);
+        clearInterval(autoClickerInterval);
+    }
+
+    function toggleAutoClicker(event) {
+        if (event.key === "'") {
+            if (autoClickerInterval) {
+                clearInterval(autoClickerInterval);
+                autoClickerInterval = null;
+            } else {
+                autoClickerInterval = setInterval(function() {
+                    var iframe = document.getElementById("gameFrame").contentWindow;
+                    var event = new MouseEvent('click', { bubbles: true });
+                    iframe.document.dispatchEvent(event);
+                }, 100); // Adjust the interval as needed
+            }
+        }
+    }
 </script>
+</body>
+</html>
