@@ -1,229 +1,317 @@
-<!DOCTYPE html> 
-<html lang="en"> 
-<head> 
-    <meta charset="UTF-8"> 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>work</title> 
-    <style> 
-        body { 
-            font-family: Arial, sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            background-color: #f2f2f2; 
-        } 
-        form { 
-            background-color: white; 
-            padding: 20px; 
-            border-radius: 8px; 
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
-            width: 300px; 
-            text-align: center; 
-        } 
-        input[type="password"], input[type="submit"], input[type="text"] { 
-            width: 100%; 
-            padding: 10px; 
-            margin: 8px 0; 
-            border: 1px solid #ccc; 
-            border-radius: 4px; 
-            box-sizing: border-box; 
-        } 
-        input[type="submit"] { 
-            background-color: #4CAF50; 
-            color: white; 
-            border: none; 
-            cursor: pointer; 
-        } 
-        .games { 
-            margin-top: 20px; 
-            display: none; 
-            flex-direction: column; 
-            align-items: center; 
-        } 
-        .game { 
-            position: relative; 
-            width: 200px; 
-            background-color: #fff; 
-            padding: 20px; 
-            border-radius: 8px; 
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
-            text-align: center; 
-            margin-bottom: 20px; 
-            transition: width 0.5s ease; 
-            cursor: pointer; 
-        } 
-        .game iframe { 
-            width: 100%; 
-            height: 100%; 
-            border: none; 
-            margin-bottom: 10px; 
-        } 
-        .btn { 
-            padding: 10px 20px; 
-            background-color: #4CAF50; 
-            color: white; 
-            border: none; 
-            border-radius: 4px; 
-            cursor: pointer; 
-        } 
-        .action-buttons { 
-            margin-top: 20px; 
-        } 
-        #panic-button, #hide-history-button { 
-            padding: 8px 16px; 
-            background-color: #000000; 
-            color: white; 
-            border: none; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            margin-right: 10px; 
-        } 
-        #floating-panic-button { 
-            position: fixed; 
-            bottom: 20px; 
-            right: 20px; 
-            z-index: 9999; 
-            display: none; 
-        } 
-        .fullscreen-button { 
-            padding: 8px 16px; 
-            background-color: #4CAF50; 
-            color: white; 
-            border: none; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            margin-top: 10px; 
-        } 
-        .fullscreen-button:hover { 
-            background-color: #000000; 
-        } 
-        .fullscreen-game { 
-            width: 100%; 
-            height: 100%; 
-        } 
-        .panic-url-container { 
-            position: fixed; 
-            top: 10px; 
-            right: 10px; 
-            background-color: white; 
-            padding: 10px; 
-            border-radius: 8px; 
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
-        } 
-    </style> 
-</head> 
-<body> 
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Basketball Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #eee;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            background: #87ceeb; /* Sky blue background */
+            display: block;
+            margin: 0 auto;
+            border: 2px solid #333;
+            border-radius: 10px;
+        }
+        #gameInfo {
+            text-align: center;
+            font-size: 24px;
+            margin: 20px;
+            color: #333;
+        }
+        #pauseMenu {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        #pauseMenu button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            background-color: #555;
+            color: white;
+            cursor: pointer;
+        }
+        #pauseMenu button:hover {
+            background-color: #777;
+        }
+        .control-buttons {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        .control-buttons button {
+            margin: 5px;
+            padding: 10px 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+            cursor: pointer;
+        }
+        .control-buttons button:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameInfo">
+        <span id="levelIndicator">Level: 1</span> | 
+        <span id="scoreIndicator">Score: 0</span>
+        <br>
+        <button id="pauseButton">Pause</button>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    <div id="pauseMenu">
+        <h2>Game Paused</h2>
+        <button id="resumeButton">Resume</button>
+        <button id="goBackButton">Go Back Level</button>
+        <button id="restartButton">Restart Game</button>
+    </div>
+    <div class="control-buttons">
+        <button id="moveLeft">Move Left</button>
+        <button id="moveRight">Move Right</button>
+        <button id="moveUp">Move Up</button>
+        <button id="moveDown">Move Down</button>
+    </div>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const gravity = 0.1;
+        const bouncePower = 12;
+        const ballColor = '#ff8c00';
+        let hoops = [];
+        let ball = { x: canvas.width / 2, y: canvas.height / 2, radius: 20, dx: 0, dy: 0, maxSpeed: 6 };
+        let currentLevel = 1;
+        const maxLevel = 100;
+        let isPaused = false;
+        let score = 0;
+        let levelIndicator = document.getElementById('levelIndicator');
+        let scoreIndicator = document.getElementById('scoreIndicator');
+        const pauseMenu = document.getElementById('pauseMenu');
+        let inputBuffer = '';
 
-<form id="passwordForm"> 
-    <h2>Enter Password</h2> 
-    <input type="password" id="password" placeholder="Password" required> 
-    <input type="submit" value="Enter"> 
-</form> 
+        // Load sound
+        const hoopSound = new Audio('hoop-sound.mp3');
+        const bgMusic = new Audio('background-music.mp3');
+        bgMusic.loop = true;
+        bgMusic.play();
 
-<div class="games" id="games"> 
-    <select id="gameList" onchange="selectGame()"> 
-        <option value="" disabled selected>Select a game</option> 
-        <option value="https://tvz3gstore.github.io/g8/monkey-mart/">Monkey Mart</option> 
-        <option value="https://book-opensocial.googleusercontent.com/gadgets/ifr?url=https://cdn.jsdelivr.net/gh/mind4ur/debugactions@955cea1ae2437efeb70d98eb7b5bc05d1e64d5da/old/old.xml&container=ig">1v1.lol</option> 
-        <option value="https://google-opensocial.googleusercontent.com/gadgets/ifr?url=https://googleusercontent.b-cdn.net/basket-random/basran.xml&container=ig">Basket Randoms</option> 
-        <option value="https://tvst1.github.io/g8/snow-rider-3d/">Snow Rider 3D</option> 
-        <option value="https://ovo.game-files.crazygames.com/ovo/10/index.html">OVO</option> 
-        <option value="https://tvst1.github.io/g/tunnel-rush/">tunnel rush</option> 
-        <option value="https://tvst1.github.io/g77/drive-mad/">drive mad</option> 
-        <option value="https://tvst1.github.io/g7/tetris-flash/">tetris flash</option> 
-        <option value="https://tvst1.github.io/g7/idle-breakout/">idle breakout</option> 
-        <option value="https://tvst1.github.io/g/drift-hunters/">drift hunters</option> 
-        <option value="https://tvst1.github.io/g77/crossy-road/">crossy road</option>
-        <option value="https://tvst1.github.io/g6/rooftop-snipers-2/">rooftop snipers 2</option>
-        <option value="https://tvst1.github.io/g26/sling-drift/">sling drift</option>
-        <option value="https://tvst1.github.io/g/basketball-stars/">basket ball stars</option>
-        <option value="https://tvst1.github.io/g3/tag/">tag game</option>
-        <option value="https://tvst1.github.io/g26/fireboy-and-watergirl-1-forest-temple/">fire boy and water girl #1</option>  
-        <option value="https://tvst1.github.io/g26/fireboy-and-watergirl-2-light-temple/">fire boy and water girl #2</option>
-        <option value="https://tvst1.github.io/g26/fireboy-watergirl-3-ice-temple/">fire boy and water girl #3</option>
-        <option value="https://tvst1.github.io/g26/fireboy-and-watergirl-4-crystal-temple/">fire boy and water girl #4</option>
-        <option value="https://tvst1.github.io/g26/fireboy-and-watergirl-5-elements/">fire boy and water girl #5</option>
-        <option value="https://tvst1.github.io/g26/fireboy-watergirl-6-fairy-tales/">fire boy and water girl #6</option>
-<option value="https://ubg98.github.io/FNAF/">Five Nights at Freddy's</option>
-        <option value="https://jcw87.github.io/c2-sans-fight/">bad time simulator</option>
-        <option value="https://tvst1.github.io/g/retro-bowl/">retro bowl</option>
-        <option value="https://tvst1.github.io/g8/cluster-rush/">cluster rush</option>
-        
-     </select> 
+        function resizeCanvas() {
+            canvas.width = window.innerWidth * 0.9;
+            canvas.height = window.innerHeight * 0.7;
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            generateLevel(currentLevel);
+        }
 
-    <div class="game" id="gameFrameContainer" style="display: none;"> 
-        <iframe id="gameFrame" frameborder="0"></iframe> 
-        <button class="fullscreen-button" id="fullscreenButton" onclick="toggleFullscreen()">Fullscreen</button> 
-    </div> 
-</div> 
+        function generateLevel(level) {
+            hoops = [];
+            for (let i = 0; i < 10; i++) {
+                hoops.push({
+                    x: Math.random() * (canvas.width - 50) + 25,
+                    y: Math.random() * (canvas.height / 2 - 50) + 25,
+                    radius: 25
+                });
+            }
+            levelIndicator.textContent = `Level: ${level}`;
+            score = 0; // Reset score at the start of each level
+            scoreIndicator.textContent = `Score: ${score}`;
+        }
 
-<div class="action-buttons" style="display: none;"> 
-    <button id="panic-button" onclick="panic()">Panic Button</button> 
-    <button id="hide-history-button" onclick="hideHistory()">Hide History</button> 
-</div> 
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = ballColor;
+            ctx.fill();
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.closePath();
+        }
 
-<button id="floating-panic-button" onclick="panic()">Panic Button</button> 
+        function drawHoops() {
+            hoops.forEach(hoop => {
+                ctx.beginPath();
+                ctx.arc(hoop.x, hoop.y, hoop.radius, 0, Math.PI * 2);
+                ctx.strokeStyle = '#ff0000';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+                ctx.closePath();
+            });
+        }
 
-<div class="panic-url-container">
-    <input type="text" id="panicUrl" value="https://myapps.classlink.com/home">
-</div>
+        function updateBall() {
+            ball.dy += gravity;
+            ball.x += ball.dx;
+            ball.y += ball.dy;
 
-<script> 
-    document.getElementById("passwordForm").addEventListener("submit", function(event) { 
-        event.preventDefault(); 
-        var password = document.getElementById("password").value; 
-        if (password === "gabe123") { 
-            document.getElementById("passwordForm").style.display = "none"; 
-            document.getElementById("games").style.display = "flex"; 
-            document.querySelector(".action-buttons").style.display = "block"; 
-            document.getElementById("floating-panic-button").style.display = "block"; 
-        } else { 
-            alert("Incorrect password. Try again."); 
-            document.getElementById("password").value = ""; 
-        } 
-    }); 
+            if (Math.abs(ball.dx) > ball.maxSpeed) ball.dx = ball.maxSpeed * Math.sign(ball.dx);
+            if (Math.abs(ball.dy) > ball.maxSpeed) ball.dy = ball.maxSpeed * Math.sign(ball.dy);
 
-    function selectGame() { 
-        var selectedGame = document.getElementById("gameList").value; 
-        var gameFrame = document.getElementById("gameFrame"); 
-        var gameFrameContainer = document.getElementById("gameFrameContainer"); 
-        var fullscreenButton = document.getElementById("fullscreenButton"); 
-        gameFrame.src = selectedGame; 
-        gameFrameContainer.style.display = "block"; 
-        fullscreenButton.style.display = "block"; 
-    } 
+            if (ball.y + ball.radius > canvas.height) {
+                ball.dy = -ball.dy * 0.7;
+                ball.y = canvas.height - ball.radius;
+                resetGame();
+            }
 
-    function toggleFullscreen() { 
-        var gameFrame = document.getElementById("gameFrame"); 
-        if (gameFrame.requestFullscreen) { 
-            gameFrame.requestFullscreen(); 
-        } else if (gameFrame.webkitRequestFullscreen) { /* Safari */ 
-            gameFrame.webkitRequestFullscreen(); 
-        } else if (gameFrame.msRequestFullscreen) { /* IE11 */ 
-            gameFrame.msRequestFullscreen(); 
-        } 
-    } 
+            if (ball.y - ball.radius < 0) {
+                ball.dy = -ball.dy * 0.7;
+                ball.y = ball.radius;
+                resetGame();
+            }
 
-    function panic() { 
-        var panicUrl = document.getElementById("panicUrl").value; 
-        window.open(panicUrl, "_blank"); 
-    } 
+            if (ball.x + ball.radius > canvas.width) {
+                ball.dx = -ball.dx * 0.7;
+                ball.x = canvas.width - ball.radius;
+            }
 
-    function hideHistory() { 
-        var newTab = window.open('about:blank'); 
-        newTab.document.write(document.documentElement.innerHTML); 
-        newTab.document.close(); 
-    } 
+            if (ball.x - ball.radius < 0) {
+                ball.dx = -ball.dx * 0.7;
+                ball.x = ball.radius;
+            }
 
-    document.addEventListener("keydown", function(event) { 
-        if (event.key === "=") { 
-            panic(); 
-        } 
-    }); 
-</script> 
-</body> 
+            hoops.forEach((hoop, index) => {
+                const distX = Math.abs(ball.x - hoop.x);
+                const distY = Math.abs(ball.y - hoop.y);
+                if (distX < hoop.radius && distY < hoop.radius) {
+                    hoopSound.play();
+                    hoops.splice(index, 1);
+                    score += 10; // Increment score for each hoop
+                    scoreIndicator.textContent = `Score: ${score}`;
+                }
+            });
+
+            if (hoops.length === 0) {
+                currentLevel++;
+                if (currentLevel > maxLevel) {
+                    alert('Good job, you finally won!');
+                    resetGame();
+                } else {
+                    generateLevel(currentLevel);
+                }
+            }
+        }
+
+        function draw() {
+            if (!isPaused) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawBall();
+                drawHoops();
+                updateBall();
+            }
+        }
+
+        function pauseGame() {
+            isPaused = true;
+            pauseMenu.style.display = 'block';
+            bgMusic.pause(); // Pause background music
+        }
+
+        function resumeGame() {
+            isPaused = false;
+            pauseMenu.style.display = 'none';
+            bgMusic.play(); // Resume background music
+        }
+
+        function goBackLevel() {
+            if (currentLevel > 1) {
+                currentLevel--;
+                generateLevel(currentLevel);
+            }
+        }
+
+        function restartGame() {
+            resetGame();
+            resumeGame();
+        }
+
+        function resetGame() {
+            currentLevel = 1;
+            generateLevel(currentLevel);
+            ball = { x: canvas.width / 2, y: canvas.height / 2, radius: 20, dx: 0, dy: 0, maxSpeed: 6 };
+        }
+
+        function handleKeyPress(event) {
+            if (event.code === 'KeyW') {
+                ball.dy -= bouncePower;
+            } else if (event.code === 'KeyA') {
+                ball.dx -= 2;
+            } else if (event.code === 'KeyD') {
+                ball.dx += 2;
+            } else if (event.code === 'KeyS') {
+                ball.dy += 2;
+            } else {
+                inputBuffer += event.key;
+                if (inputBuffer.endsWith('sigma')) {
+                    currentLevel++;
+                    if (currentLevel > maxLevel) {
+                        alert('Good job, you finally won!');
+                        resetGame();
+                    } else {
+                        generateLevel(currentLevel);
+                    }
+                    inputBuffer = '';
+                }
+            }
+        }
+
+        function handleTouchStart(event) {
+            const touch = event.touches[0];
+            const touchX = touch.clientX - canvas.offsetLeft;
+            const touchY = touch.clientY - canvas.offsetTop;
+
+            if (touchY < canvas.height / 2) {
+                ball.dy -= bouncePower * 0.5;
+            }
+            if (touchX < canvas.width / 2) {
+                ball.dx -= 2;
+            }
+            if (touchX > canvas.width / 2) {
+                ball.dx += 2;
+            }
+            if (touchY > canvas.height / 2) {
+                ball.dy += 2;
+            }
+
+            event.preventDefault();
+        }
+
+        // Add event listeners
+        document.addEventListener('keydown', handleKeyPress);
+        document.addEventListener('touchstart', handleTouchStart);
+
+        document.getElementById('pauseButton').addEventListener('click', pauseGame);
+        document.getElementById('resumeButton').addEventListener('click', resumeGame);
+        document.getElementById('goBackButton').addEventListener('click', goBackLevel);
+        document.getElementById('restartButton').addEventListener('click', restartGame);
+
+        document.getElementById('moveLeft').addEventListener('click', () => ball.dx -= 2);
+        document.getElementById('moveRight').addEventListener('click', () => ball.dx += 2);
+        document.getElementById('moveUp').addEventListener('click', () => ball.dy -= bouncePower);
+        document.getElementById('moveDown').addEventListener('click', () => ball.dy += 2);
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        setInterval(draw, 16);
+    </script>
+</body>
 </html>
