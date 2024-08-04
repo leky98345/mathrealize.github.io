@@ -49,26 +49,6 @@
         #pauseMenu button:hover {
             background-color: #777;
         }
-        .control-buttons {
-            position: fixed;
-            bottom: 10px;
-            left: 10px;
-            display: flex;
-            flex-direction: column;
-        }
-        .control-buttons button {
-            margin: 5px;
-            padding: 10px 15px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            background-color: #333;
-            color: white;
-            cursor: pointer;
-        }
-        .control-buttons button:hover {
-            background-color: #555;
-        }
     </style>
 </head>
 <body>
@@ -84,12 +64,6 @@
         <button id="resumeButton">Resume</button>
         <button id="goBackButton">Go Back Level</button>
         <button id="restartButton">Restart Game</button>
-    </div>
-    <div class="control-buttons">
-        <button id="moveLeft">Move Left</button>
-        <button id="moveRight">Move Right</button>
-        <button id="moveUp">Move Up</button>
-        <button id="moveDown">Move Down</button>
     </div>
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -107,6 +81,7 @@
         let scoreIndicator = document.getElementById('scoreIndicator');
         const pauseMenu = document.getElementById('pauseMenu');
         let inputBuffer = '';
+        let touchStartX, touchStartY;
 
         // Load sound
         const hoopSound = new Audio('hoop-sound.mp3');
@@ -274,44 +249,55 @@
         }
 
         function handleTouchStart(event) {
-            const touch = event.touches[0];
-            const touchX = touch.clientX - canvas.offsetLeft;
-            const touchY = touch.clientY - canvas.offsetTop;
-
-            if (touchY < canvas.height / 2) {
-                ball.dy -= bouncePower * 0.5;
-            }
-            if (touchX < canvas.width / 2) {
-                ball.dx -= 2;
-            }
-            if (touchX > canvas.width / 2) {
-                ball.dx += 2;
-            }
-            if (touchY > canvas.height / 2) {
-                ball.dy += 2;
-            }
-
-            event.preventDefault();
+            touchStartX = event.touches[0].clientX;
+            touchStartY = event.touches[0].clientY;
         }
 
-        // Add event listeners
-        document.addEventListener('keydown', handleKeyPress);
-        document.addEventListener('touchstart', handleTouchStart);
+        function handleTouchMove(event) {
+            if (!touchStartX || !touchStartY) return;
 
-        document.getElementById('pauseButton').addEventListener('click', pauseGame);
-        document.getElementById('resumeButton').addEventListener('click', resumeGame);
-        document.getElementById('goBackButton').addEventListener('click', goBackLevel);
-        document.getElementById('restartButton').addEventListener('click', restartGame);
+            const touchEndX = event.touches[0].clientX;
+            const touchEndY = event.touches[0].clientY;
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
 
-        document.getElementById('moveLeft').addEventListener('click', () => ball.dx -= 2);
-        document.getElementById('moveRight').addEventListener('click', () => ball.dx += 2);
-        document.getElementById('moveUp').addEventListener('click', () => ball.dy -= bouncePower);
-        document.getElementById('moveDown').addEventListener('click', () => ball.dy += 2);
+            const threshold = 30; // Minimum swipe distance
 
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                if (deltaX > threshold) {
+                    ball.dx += 2; // Swipe right
+                } else if (deltaX < -threshold) {
+                    ball.dx -= 2; // Swipe left
+                }
+            } else {
+                if (deltaY > threshold) {
+                    ball.dy += 2; // Swipe down
+                } else if (deltaY < -threshold) {
+                    ball.dy -= bouncePower; // Swipe
+                 Up
+                 }
+                 }
 
-        setInterval(draw, 16);
-    </script>
-</body>
+        touchStartX = event.touches[0].clientX;
+        touchStartY = event.touches[0].clientY;
+
+        event.preventDefault();
+    }
+
+    // Add event listeners
+    document.addEventListener('keydown', handleKeyPress);
+    document.addEventListener('touchstart', handleTouchStart);
+    document.addEventListener('touchmove', handleTouchMove);
+
+    document.getElementById('pauseButton').addEventListener('click', pauseGame);
+    document.getElementById('resumeButton').addEventListener('click', resumeGame);
+    document.getElementById('goBackButton').addEventListener('click', goBackLevel);
+    document.getElementById('restartButton').addEventListener('click', restartGame);
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    setInterval(draw, 16);
+</script> </body>
 </html>
+```
