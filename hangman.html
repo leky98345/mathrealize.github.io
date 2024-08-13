@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangman Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f2f2f2;
+        }
+        #word, #status, #guesses, #message {
+            font-size: 2em;
+            margin: 20px 0;
+        }
+        button {
+            font-size: 1em;
+            margin: 5px;
+        }
+        input {
+            font-size: 1em;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hangman Game</h1>
+    <div id="message"></div>
+    <div id="word"></div>
+    <div id="status"></div>
+    <div id="guesses"></div>
+    <input type="text" id="letter" maxlength="1" placeholder="Guess a letter" />
+    <button onclick="guessLetter()">Guess</button>
+    <button onclick="startNewGame()">Start New Game</button>
+
+    <script>
+        let selectedWord = '';
+        let displayedWord = [];
+        let guessedLetters = [];
+        let remainingAttempts = 6;
+        let isSecondPlayer = false;
+
+        function updateDisplay() {
+            document.getElementById('word').innerText = displayedWord.join(' ');
+            document.getElementById('status').innerText = `Attempts left: ${remainingAttempts}`;
+            document.getElementById('guesses').innerText = `Guessed letters: ${guessedLetters.join(', ')}`;
+        }
+
+        function guessLetter() {
+            const letterInput = document.getElementById('letter');
+            const letter = letterInput.value.toLowerCase();
+            letterInput.value = '';
+            
+            if (letter && !guessedLetters.includes(letter)) {
+                guessedLetters.push(letter);
+                
+                if (selectedWord.includes(letter)) {
+                    for (let i = 0; i < selectedWord.length; i++) {
+                        if (selectedWord[i] === letter) {
+                            displayedWord[i] = letter;
+                        }
+                    }
+                } else {
+                    remainingAttempts--;
+                }
+
+                if (displayedWord.join('') === selectedWord) {
+                    document.getElementById('status').innerText = `You won! The word was "${selectedWord}".`;
+                    document.querySelector('button').disabled = true;
+                } else if (remainingAttempts === 0) {
+                    document.getElementById('status').innerText = `Game over! The word was "${selectedWord}".`;
+                    document.querySelector('button').disabled = true;
+                }
+
+                updateDisplay();
+            }
+        }
+
+        function startNewGame() {
+            const messageElement = document.getElementById('message');
+            const wordInput = prompt('Enter the word for the other player to guess:').toLowerCase();
+            
+            if (wordInput) {
+                selectedWord = wordInput;
+                displayedWord = Array(selectedWord.length).fill('_');
+                guessedLetters = [];
+                remainingAttempts = 6;
+                isSecondPlayer = true;
+
+                updateDisplay();
+                messageElement.innerText = 'The game has started! You can now guess letters.';
+                document.querySelector('button').disabled = false;
+            }
+        }
+
+        startNewGame();  // Initialize the game when the page loads
+    </script>
+</body>
+</html>
